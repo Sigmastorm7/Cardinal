@@ -1,0 +1,28 @@
+## Interface: 90005
+
+## Title: Micromap
+## Author: Siggy
+## Notes: A minimap so small it's basically no minimap at all!
+## Version: 1.0.0
+
+## X-Credits: Siggy
+## X-Category: Interface Enhancements
+
+## X-Embeds: HereBeDragons-2.0
+
+embeds.xml
+
+#template\Locale.lua
+template\Database.lua
+template\UtilityFunctions.lua
+template\EventDispatcher.lua
+
+# Core Files
+Micromap.xml
+Micromap.lua
+
+# From QuestPointer
+Config.lua
+
+# Townlong-Yak TaintLess
+TaintLess.xml
