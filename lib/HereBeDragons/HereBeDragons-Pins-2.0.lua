@@ -111,10 +111,8 @@ end
 
 -------------------------------------------------------------------------------------------
 -- Minimap pin position logic
-local maxPos = 560/2
-
 -- minimap rotation
-local rotateMinimap = true
+-- local rotateMinimap = true
 
 -- is the minimap indoors or outdoors
 local indoors = GetCVar("minimapZoom")+0 == pins.Minimap:GetZoom() and "outdoor" or "indoor"
@@ -123,63 +121,29 @@ local minimapPinCount, queueFullUpdate = 0, false
 local minimapScale, minimapShape, mapRadius, minimapWidth, minimapHeight, mapSin, mapCos
 local lastZoom, lastFacing, lastXY, lastYY
 
+-- % Primary Edits for POI movement on the HUD
 local function drawMinimapPin(pin, data)
     local xDist, yDist = lastXY - data.x, lastYY - data.y
 
-    local pinPos
     local facing = GetPlayerFacing()
     local x, y, instance = HBD:GetPlayerWorldPosition()
     local vector, distance = HBD:GetWorldVector(instance, x, y, data.x, data.y)
+    local value = deg(facing) - deg(vector)
 
-    pinPos = facing - vector
-
-    -- print((facing-rad(180)) - tangent)
-
-    --[[
-    -- handle rotation
-    if rotateMinimap then
-        local dx, dy = xDist, yDist
-        xDist = dx*mapCos - dy*mapSin
-        yDist = dx*mapSin + dy*mapCos
-    end
-
-    -- adapt delta position to the map radius
-    local diffX = xDist / mapRadius
-    local diffY = yDist / mapRadius
-
-    -- different minimap shapes
-    
-    local isRound = true
-    if minimapShape and not (xDist == 0 or yDist == 0) then
-        isRound = (xDist < 0) and 1 or 3
-        if yDist < 0 then
-            isRound = minimapShape[isRound]
-        else
-            isRound = minimapShape[isRound + 1]
-        end
-    end
-    ]]
-
-    -- calculate distance from the center of the map
-    -- local dist = (diffX*diffX + diffY*diffY) / 0.9^2
-    --[[
-    if isRound then
-        dist = (diffX*diffX + diffY*diffY) / 0.9^2
-    else
-        dist = max(diffX*diffX, diffY*diffY) / 0.9^2
-    end
-    ]]
-
-
-    if pinPos < minimapWidth or pinPos > -minimapWidth then
+    if distance then
         pin:Show()
-        pin:ClearAllPoints()
-        pin:SetPoint("CENTER", Micromap.HUD, "CENTER", pinPos*(minimapWidth/2) , 0) -- -diffY * minimapHeight)
-        -- data.onEdge = (dist > 1)
+        pin:SetPoint("CENTER", pins.Minimap, "CENTER", 0, 0) -- -diffY * minimapHeight)
+
+        if (value > 0 and value < 180) or (value < 0 and value > -180) then
+            pin:SetValue(value)
+        elseif value <= -180 then
+            pin:SetValue(value + 360)
+        elseif value >= 180 then
+            pin:SetValue(value - 360)
+        end
     else
         pin:Hide()
-        -- data.onEdge = nil
-        pin.keep = nil
+        return
     end
 end
 
@@ -257,6 +221,7 @@ local function UpdateMinimapPins(force)
                 activeMinimapPins[pin] = data
                 data.keep = true
                 -- draw the pin (this may reset data.keep if outside of the map)
+                -- drawMinimapPin(pin, data)
                 drawMinimapPin(pin, data)
             end
         end

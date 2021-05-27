@@ -1,52 +1,470 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-	<!--<Script file="..\Micromap\Micromap.lua"/>-->
-    <Slider name="MicromapPinTemplate" parent="Micromap" defaultvalue="0" minvalue="-180" maxvalue="180" hidden="true" virtual="true" inherits="HorizontalSliderTemplate">
+	<Script file="Utility.lua"/>
+    <!--<Button name="MicromapPinButtonTemplate" parent="MicromapSliderCluster" inherits="WorldQuestPinMixin" virtual="true">
+    </Button>-->
+    <Slider name="MicromapPinSliderTemplate" parent="MicromapSliderCluster" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL" virtual="true">
         <Size>
             <AbsDimension x="720" y="45"/>
         </Size>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
-        <ThumbTexture parentKey="Thumb" name="$parentIcon" file="Interface\Artifacts\Artifacts-PerkRing-Final-Mask">
-            <Size x="32" y="32"/>
+        <ThumbTexture parentKey="Thumb" name="$parentPOI">
+            <Size x="34" y="34"/>
         </ThumbTexture>
+        <Frames>
+            <Frame parentKey="Hitbox">
+                <Size>
+                    <AbsDimension x="24" y="24"/>
+                </Size>
+            </Frame>
+        </Frames>
         <Scripts>
+            <OnShow>
+                self:EnableMouse(false)
+            </OnShow>
         </Scripts>
     </Slider>
-    
-    <Frame name="MicromapPins">
-
-    </Frame>
-
     <Frame name="Micromap" frameStrata="LOW" toplevel="true" enableMouse="true" parent="UIParent">
         <Size>
-            <AbsDimension x="800" y="60"/>
+            <AbsDimension x="740" y="55"/>
         </Size>
         <Anchors>
-            <Anchor point="TOP"/>
+            <Anchor point="TOP" x="0" y="-12"/>
         </Anchors>
         <Frames>
-            <Slider parentKey="HUD" defaultvalue="0" minvalue="-180" maxvalue="180" inherits="HorizontalSliderTemplate">
+            <Frame name="MicromapSliderCluster" enableMouse="false">
                 <Size>
-                    <AbsDimension x="720" y="40"/>
+                    <AbsDimension x="720" y="45"/>
                 </Size>
                 <Anchors>
                     <Anchor point="CENTER"/>
                 </Anchors>
-                <ThumbTexture parentKey="Thumb" name="$parentThumb" file="Interface\Minimap\CompassNorthTag">
-			        <Size x="24" y="24"/>
-		        </ThumbTexture>
-                <Scripts>
-                    <OnShow>
-                        self:EnableMouse(false);
-                        self:SetValueStep(1)
-                    </OnShow>
-                </Scripts>
-            </Slider>
+                <Frames>
+                    <!--<Slider parentKey="Heading" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                        <Size>
+                            <AbsDimension x="720" y="45"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <ThumbTexture parentKey="Thumb" name="$parentThumb">
+			                <Size x="24" y="24"/>
+		                </ThumbTexture>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="Char" inherits="SplashHeaderFont">
+                                    <Size x="36" y="36"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" relativeKey="$parent.Thumb" relativePoint="CENTER"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnShow>
+                                self.Char:SetText("N");
+                                self:EnableMouse(false);
+                                self:SetValueStep(1);
+                            </OnShow>
+                        </Scripts>
+                    </Slider>-->
+                    <Slider parentKey="North" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                        <Size>
+                            <AbsDimension x="720" y="45"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="direction" value="N" type="string"/>
+                            <KeyValue key="offset" value="0" type="number"/>
+                        </KeyValues>
+                        <ThumbTexture parentKey="Thumb" name="$parentThumb">
+			                <Size x="24" y="24"/>
+		                </ThumbTexture>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="Char" inherits="SplashHeaderFont">
+                                    <Size x="36" y="36"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" relativeKey="$parent.Thumb" relativePoint="CENTER"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnShow>
+                                self.Char:SetText("N");
+                                self:EnableMouse(false);
+                                self:SetValueStep(1);
+                            </OnShow>
+                        </Scripts>
+                    </Slider>
+                    <Slider parentKey="East" defaultvalue="90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                        <Size>
+                            <AbsDimension x="720" y="45"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="direction" value="E" type="string"/>
+                            <KeyValue key="offset" value="90" type="number"/>
+                        </KeyValues>
+                        <ThumbTexture parentKey="Thumb" name="$parentThumb">
+			                <Size x="24" y="24"/>
+		                </ThumbTexture>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="Char" inherits="SplashHeaderFont">
+                                    <Size x="36" y="36"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" relativeKey="$parent.Thumb" relativePoint="CENTER"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnShow>
+                                self.Char:SetText("E");
+                                self:EnableMouse(false);
+                                self:SetValueStep(1);
+                            </OnShow>
+                        </Scripts>
+                    </Slider>
+                    <Slider parentKey="South" defaultvalue="180" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                        <Size>
+                            <AbsDimension x="720" y="45"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="direction" value="S" type="string"/>
+                            <KeyValue key="offset" value="180" type="number"/>
+                        </KeyValues>
+                        <ThumbTexture parentKey="Thumb" name="$parentThumb">
+			                <Size x="24" y="24"/>
+		                </ThumbTexture>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="Char" inherits="SplashHeaderFont">
+                                    <Size x="36" y="36"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" relativeKey="$parent.Thumb" relativePoint="CENTER"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnShow>
+                                self.Char:SetText("S");
+                                self:EnableMouse(false);
+                                self:SetValueStep(1);
+                            </OnShow>
+                        </Scripts>
+                    </Slider>
+                    <Slider parentKey="West" defaultvalue="-90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                        <Size>
+                            <AbsDimension x="720" y="45"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="direction" value="W" type="string"/>
+                            <KeyValue key="offset" value="-90" type="number"/>
+                        </KeyValues>
+                        <ThumbTexture parentKey="Thumb" name="$parentThumb">
+			                <Size x="24" y="24"/>
+		                </ThumbTexture>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString parentKey="Char" inherits="SplashHeaderFont">
+                                    <Size x="36" y="36"/>
+                                    <Anchors>
+                                        <Anchor point="CENTER" relativeKey="$parent.Thumb" relativePoint="CENTER"/>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnShow>
+                                self.Char:SetText("W");
+                                self:EnableMouse(false);
+                                self:SetValueStep(1);
+                            </OnShow>
+                        </Scripts>
+                    </Slider>
+                </Frames>
+            </Frame>
+            <Button name="GarrisonLandingPageMicromapButton" parentKey="Garrison" hidden="true">
+				<Size x="53" y="53"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="BOTTOMLEFT" x="0" y="12"/>
+				</Anchors>
+				<HitRectInsets>
+					<AbsInset left="5" right="10" top="5" bottom="10"/>
+				</HitRectInsets>
+				<Layers>
+					<Layer level="BORDER">
+						<Texture parentKey="AlertBG" hidden="true" alpha="0" atlas="GarrLanding-MinimapAlertBG" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="RIGHT" relativePoint="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Texture parentKey="LoopingGlow" hidden="true" alpha="0" alphaMode="ADD" atlas="GarrLanding-CircleGlow" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="SideToastGlow" hidden="true" alpha="0" alphaMode="ADD" atlas="GarrLanding-SideToast-Glow" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<FontString parentKey="AlertText" hidden="true" alpha="0" justifyH="RIGHT" inherits="GameFontHighlightLeft">
+							<Size x="138" y="45"/>
+							<Anchors>
+								<Anchor point="RIGHT" relativePoint="LEFT" x="4" y="0"/>
+							</Anchors>
+						</FontString>
+						<Texture parentKey="CircleGlow" hidden="true" alpha="1" alphaMode="ADD" atlas="GarrLanding-CircleGlow" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="SoftButtonGlow" hidden="true" alpha="1" alphaMode="ADD" atlas="GarrLanding-SideToast-Glow" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Animations>
+					<AnimationGroup parentKey="MicromapLoopPulseAnim" looping="REPEAT">
+						<Alpha childKey="LoopingGlow" duration="0.5" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="LoopingGlow" startDelay="0.5" duration="1" order="1" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="LoopingGlow" duration="0.75" order="1" fromScaleX="0.75" fromScaleY="0.75" toScaleX="1.1" toScaleY="1.1"/>
+						<Scripts>
+							<OnPlay>
+								self:GetParent().LoopingGlow:Show();
+							</OnPlay>
+							<OnStop>
+								self:GetParent().LoopingGlow:Hide();
+							</OnStop>
+							<OnFinished>
+								self:GetParent().LoopingGlow:Hide();
+							</OnFinished>
+						</Scripts>
+					</AnimationGroup>
+					<AnimationGroup parentKey="MicromapPulseAnim" setToFinalAlpha="true">
+						<Alpha childKey="CircleGlow" duration="0.1" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="CircleGlow" startDelay="0.1" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="CircleGlow" duration="0.25" order="1" fromScaleX="0.75" fromScaleY="0.75" toScaleX="1.75" toScaleY="1.75"/>
+						<Alpha childKey="SoftButtonGlow" duration="0.5" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="SoftButtonGlow" startDelay="0.5" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="SoftButtonGlow" duration="0.75" order="1" fromScaleX="1" fromScaleY="1" toScaleX="1.5" toScaleY="1.5"/>
+						<Scripts>
+							<OnPlay>
+								self:GetParent().CircleGlow:Show();
+								self:GetParent().SoftButtonGlow:Show();
+							</OnPlay>
+							<OnStop>
+								self:GetParent().CircleGlow:Hide();
+								self:GetParent().SoftButtonGlow:Hide();
+							</OnStop>
+							<OnFinished>
+								self:GetParent().CircleGlow:Hide();
+								self:GetParent().SoftButtonGlow:Hide();
+							</OnFinished>
+						</Scripts>
+					</AnimationGroup>
+					<AnimationGroup parentKey="MicromapAlertAnim" setToFinalAlpha="true">
+						<Alpha childKey="AlertText" duration="0.25" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="AlertBG" duration="0.25" order="1" fromAlpha="0" toAlpha="1"/>
+						<Scale childKey="AlertBG" duration="0.25" order="1" fromScaleX="0.1" fromScaleY="1" toScaleX="1" toScaleY="1">
+							<Origin point="CENTER">
+								<Offset x="65" y="0"/>
+							</Origin>
+						</Scale>
+						<Alpha childKey="SideToastGlow" duration="0.5" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="SideToastGlow" startDelay="0.5" duration="0.5" order="1" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="SideToastGlow" duration="0.5" order="1" fromScaleX="1" fromScaleY="1" toScaleX="2" toScaleY="1">
+							<Origin point="RIGHT">
+								<Offset x="-10" y="0"/>
+							</Origin>
+						</Scale>
+						<Alpha childKey="AlertText" startDelay="5" duration="0.25" order="2" fromAlpha="1" toAlpha="0"/>
+						<Alpha childKey="AlertBG" startDelay="5" duration="0.25" order="2" fromAlpha="1" toAlpha="0"/>
+						<Scale childKey="AlertBG" startDelay="5" duration="0.25" order="2" fromScaleX="1" fromScaleY="1" toScaleX="0.1" toScaleY="1">
+							<Origin point="RIGHT">
+								<Offset x="0" y="0"/>
+							</Origin>
+						</Scale>
+						<Scripts>
+							<OnPlay>
+								self:GetParent().AlertBG:Show();
+								self:GetParent().AlertText:Show();
+								self:GetParent().SideToastGlow:Show();
+								self:GetParent().MicromapPulseAnim:Play();
+							</OnPlay>
+							<OnStop>
+								self:GetParent().AlertBG:Hide();
+								self:GetParent().AlertText:Hide();
+								self:GetParent().SideToastGlow:Hide();
+								self:GetParent().MicromapPulseAnim:Stop();
+							</OnStop>
+							<OnFinished>
+								self:GetParent().AlertBG:Hide();
+								self:GetParent().AlertText:Hide();
+								self:GetParent().SideToastGlow:Hide();
+								self:GetParent().MicromapPulseAnim:Stop();
+								GarrisonMicromap_CheckQueuedHelpTip(self:GetParent());
+							</OnFinished>
+						</Scripts>
+					</AnimationGroup>
+				</Animations>
+				<Scripts>
+					<OnLoad function="GarrisonLandingPageMicromapButton_OnLoad"/>
+					<OnEvent function="GarrisonLandingPageMicromapButton_OnEvent"/>
+					<OnClick function="GarrisonLandingPageMicromapButton_OnClick"/>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
+						GameTooltip:SetText(self.title, 1, 1, 1);
+						GameTooltip:AddLine(self.description, nil, nil, nil, true);
+						GameTooltip:Show();
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts>
+				<NormalTexture atlas="GarrLanding-MinimapIcon-Alliance-Up" useAtlasSize="true"/>
+				<PushedTexture atlas="GarrLanding-MinimapIcon-Alliance-Down" useAtlasSize="true"/>
+				<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
+			</Button>
+            <Button name="MicromapZoneTextButton" enableMoue="true">
+                <Size x="140" y="12"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeKey="$parent.Garrison" relativePoint="RIGHT" x="0" y="0"/>
+                </Anchors>
+                <Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="MicromapZoneText" inherits="GameFontNormal" nonspacewrap="true" justifyH="LEFT">
+							<Size x="140" y="12"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
+						local pvpType, isSubZonePvP, factionName = GetZonePVPInfo();
+						Micromap_SetTooltip( pvpType, factionName );
+						GameTooltip:Show();
+					</OnEnter>
+					<OnLeave function="GameTooltip_Hide"/>
+                    <OnClick>
+						ToggleWorldMap();
+					</OnClick>
+				</Scripts>
+            </Button>
+            <Frame name="MicromapMailFrame" enableMouse="true" hidden="true">
+				<Size>
+					<AbsDimension x="36" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-4" y="6"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="Mail" name="MicromapMailIcon" file="Interface\Addons\Micromap\media\icon_mail">
+							<Size>
+								<AbsDimension x="48" y="48"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self:RegisterEvent("UPDATE_PENDING_MAIL");
+						self:SetFrameLevel(self:GetFrameLevel()+1)
+					</OnLoad>
+					<OnEvent>
+						if ( event == "UPDATE_PENDING_MAIL" ) then
+							if ( HasNewMail() ) then
+								self:Show();
+								if( GameTooltip:IsOwned(self) ) then
+									MicromapMailFrameUpdate();
+								end
+							else
+								self:Hide();
+							end
+						end
+					</OnEvent>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
+						if( GameTooltip:IsOwned(self) ) then
+							MicromapMailFrameUpdate();
+						end
+					</OnEnter>
+					<OnLeave function="GameTooltip_Hide"/>
+				</Scripts>
+			</Frame>
         </Frames>
+        <Layers>
+            <Layer level="OVERLAY" textureSubLevel="0">
+                <Texture parentKey="CenterOuterRing" file="Interface/Garrison/AdventureMissionsFrame">
+                    <Size x="64" y="66"/>
+                    <TexCoords left="0.103515625" right="0.1953125" top="0.76513671875" bottom="0.81201171875"/>
+                    <Anchors>
+                        <Anchor point="CENTER" relativeKey="$parent" relativePoint="CENTER"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="OVERLAY" textureSubLevel="-1">
+                <Texture parentKey="Arrow" file="Interface/Garrison/AdventureMissionsFrame">
+                    <Size x="20" y="15"/>
+                    <TexCoords left="0.197265625" right="0.216796875" top="0.80322265625" bottom="0.810546875"/>
+                    <Anchors>
+                        <Anchor point="BOTTOM" relativeKey="$parent.CenterOuterRing" relativePoint="BOTTOM" x="0" y="4"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <FontString parentKey="TrackedPOI" inherits="Fancy22Font" justifyH="LEFT">
+                    <Size x="250" y="48"/>
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parent" relativePoint="RIGHT" x="8" y="0"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="BG" file="Interface/GuildFrame/CommunitiesFinder">
+                    <Size x="720" y="48"/>
+                    <TexCoords left="0.4189453125" right="0.9755859375" top="0.4921875" bottom="0.630859375"/>
+                    <Anchors>
+                        <Anchor point="CENTER" relativeKey="$parent" relativePoint="CENTER"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+        </Layers>
         <Scripts>
+            <OnUpdate function="Micromap_Update"/>
+            <OnShow>
+                self.Arrow:SetRotation(rad(180))
+            </OnShow>
         </Scripts>
     </Frame>
-
 </Ui>

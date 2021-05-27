@@ -20,9 +20,9 @@ template\EventDispatcher.lua
 # Core Files
 Micromap.xml
 Micromap.lua
-
-# From QuestPointer
+Utility.lua
 Config.lua
+Debug.lua
 
 # Townlong-Yak TaintLess
 TaintLess.xml
