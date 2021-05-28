@@ -334,7 +334,7 @@ function ns:UpdateWorldPOIs(mapid)
 
 				local distance = C_QuestLog.GetDistanceSqToQuest(poiButton.questID)
 
-				poiButton:SetScale(ns.db.iconScale * (rad(rad(sqrt(distance))))*0.75)
+				poiButton:SetScale(ns.db.iconScale * poiButton.scaleFactor)-- (rad(rad(sqrt(distance))))*0.75)
 
 				taskIconIndex = taskIconIndex + 1
 
