@@ -19,9 +19,16 @@
             </OnShow>
         </Scripts>
     </Slider>
+    <Frame name="CardinalCluster" frameStrata="LOW" toplevel="true" enableMouse="true" parent="UIParent">
+        <Size x="1" y="1"/>
+        <Anchors>
+            <Anchor point="TOPLEFT" relativeTo="UIParent" relativePoint="TOPLEFT" x="0" y="0"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="UIParent" relativePoint="TOPRIGHT" x="0" y="-80"/>
+        </Anchors>
+    </Frame>
     <Frame name="Cardinal" frameStrata="LOW" toplevel="true" enableMouse="true" parent="UIParent">
         <Size>
-            <AbsDimension x="740" y="55"/>
+            <AbsDimension x="800" y="60"/>
         </Size>
         <Anchors>
             <Anchor point="TOP" x="0" y="-12"/>

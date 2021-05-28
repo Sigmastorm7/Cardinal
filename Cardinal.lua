@@ -4,70 +4,25 @@ local Debug = ns.Debug
 
 local HBD = LibStub("HereBeDragons-2.0")
 local HBDPins = LibStub("HereBeDragons-Pins-2.0")
--------------------------------------------------------------------------------------
-
-local timeElapsed = 0
-local _value
-local mediaPath = "Interface/Addons/Cardinal/media/"
-local covenantData = C_Covenants.GetCovenantData(C_Covenants.GetActiveCovenantID());
 
 ns.defaults = {
 	iconScale = 0.7,
-	throttleTime = 0.0125,
+	throttle = 0.0125,
 	poiFOV = 135,
 	compassFOV = 90,
 }
 ns.defaultsPC = {}
 
-HBDPins:SetMinimapObject(Cardinal)
-
-local function CompassUpdate(self, elapsed)
-	timeElapsed = timeElapsed + elapsed
-    while (timeElapsed > ns.db.throttleTime) do
-        timeElapsed = timeElapsed - ns.db.throttleTime
-        local value = deg(GetPlayerFacing()) + self.offset
-        if value == _value then
-            return
-        elseif value ~= _value then
-            if value > 180 then
-                self:SetValue(value-360)
-                _value = value
-            elseif value < 180 then
-                self:SetValue(value)
-                _value = value
-            end
-        end
-		self.Char:SetPoint("TOP", self.Thumb, "BOTTOM", 0, -11)
-		local selfValue = self:GetValue()
-		if selfValue < -25 or selfValue > 25 then
-			self.Char:SetText("")
-		else
-			self.Char:SetText(self.direction)
-		end
-    end
-end
-
--- Script hooks for cardinal direction sliders
-do
-	CardinalSliderCluster.North:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.East:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.South:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.West:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.NorthWest:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.SouthWest:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.SouthEast:HookScript("OnUpdate", CompassUpdate)
-	CardinalSliderCluster.NorthEast:HookScript("OnUpdate", CompassUpdate)
-end
--------------------------------------------------------------------------------------
--- Shamelessly stolen from QuestPointer
--------------------------------------------------------------------------------------
 ns:RegisterEvent("ADDON_LOADED")
+
+Minimap:UnregisterEvent("MINIMAP_UPDATE_ZOOM")
+MinimapCluster = CardinalCluster
+Minimap:Hide()
+
 function ns:ADDON_LOADED(event, addon)
 	if addon ~= myname then return end
 
-	-- Hide the default UI Minimap & MinimapCluster
-	Minimap:Hide()
-	MinimapCluster:Hide()
+	HBDPins:SetMinimapObject(Cardinal)
 
 	self:InitDB()
 
@@ -111,7 +66,7 @@ function ns:ADDON_LOADED(event, addon)
 
 	ns.ParentFrame = CreateFrame("Frame")
 	QuestPOI_Initialize(ns.ParentFrame)
-	ns.wqPool = CreateFramePool("BUTTON", ns.ParentFrame, "QuestPinTemplate") -- "WorldMap_WorldQuestPinTemplate")
+	ns.wqPool = CreateFramePool("BUTTON", ns.ParentFrame, "QuestPinTemplate")
 
 	ns.buttonPool = CreateFramePoolCollection()
 	ns.buttonPool:CreatePool("BUTTON", ns.ParentFrame, "QuestPinTemplate")
@@ -139,6 +94,60 @@ end
 function ns:PLAYER_LOGOUT()
 	self:FlushDB()
 	-- Do anything you need to do as the player logs out
+end
+
+local timeElapsed = 0
+local _value
+-- local mediaPath = "Interface/Addons/Cardinal/media/"
+-- local covenantData = C_Covenants.GetCovenantData(C_Covenants.GetActiveCovenantID())
+
+--[[
+local _TimeManagerClockButton_OnLoad = TimeManagerClockButton_OnLoad
+TimeManagerClockButton_OnLoad = function(self)
+	self:SetParent(Cardinal)
+	_TimeManagerClockButton_OnLoad(self)
+end
+]]
+
+local function CompassUpdate(self, elapsed)
+	local facing = GetPlayerFacing()
+	if not facing then print("No facing value, returning...") return end
+
+	timeElapsed = timeElapsed + elapsed
+    while (timeElapsed > ns.db.throttle) do
+        timeElapsed = timeElapsed - ns.db.throttle
+        local value = deg(GetPlayerFacing()) + self.offset
+        if value == _value then
+            return
+        elseif value ~= _value then
+            if value > 180 then
+                self:SetValue(value-360)
+                _value = value
+            elseif value < 180 then
+                self:SetValue(value)
+                _value = value
+            end
+        end
+		self.Char:SetPoint("TOP", self.Thumb, "BOTTOM", 0, -11)
+		local selfValue = self:GetValue()
+		if selfValue < -25 or selfValue > 25 then
+			self.Char:SetText("")
+		else
+			self.Char:SetText(self.direction)
+		end
+    end
+end
+
+-- Script hooks for cardinal direction sliders
+do
+	CardinalSliderCluster.North:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.East:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.South:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.West:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.NorthWest:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.SouthWest:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.SouthEast:HookScript("OnUpdate", CompassUpdate)
+	CardinalSliderCluster.NorthEast:HookScript("OnUpdate", CompassUpdate)
 end
 
 local pois = {}
@@ -169,18 +178,26 @@ function ns:ClosestPOI()
 	return closest
 end
 
-function ns:UpdatePOIs(...)
-	-- self.Debug("UpdatePOIs", ...)
-
+function ns:TrackingUpdate()
 	if C_SuperTrack.IsSuperTrackingAnything() then
 		local tracked = C_SuperTrack.GetSuperTrackedQuestID()
 		local objectives = C_QuestLog.GetQuestObjectives(tracked)
+
+		-- When logging in C_.GetQuestObjectives() seems to return 'nil' despite C_.IsSuperTrackingAnything() returning true
+		if not objectives then return end
+
 		CardinalTracker.Title:SetText(C_QuestLog.GetTitleForQuestID(tracked))
 		CardinalTracker.Objective:SetText(objectives[1]["text"])
 	else
 		CardinalTracker.Title:SetText("")
 		CardinalTracker.Objective:SetText("")
 	end
+end
+
+function ns:UpdatePOIs(...)
+	-- self.Debug("UpdatePOIs", ...)
+
+	ns:TrackingUpdate()
 
 	local x, y, mapid = HBD:GetPlayerZonePosition()
 	if not (mapid and x and y) then

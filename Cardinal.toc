@@ -25,7 +25,6 @@ Cardinal.xml
 Cardinal.lua
 Utility.lua
 Config.lua
-Debug.lua
 
 
 # Townlong-Yak TaintLess
