@@ -1,9 +1,12 @@
 ## Interface: 90005
 
-## Title: Micromap
+## Title: Cardinal
 ## Author: Siggy
 ## Notes: A minimap so small it's basically no minimap at all!
 ## Version: 1.0.0
+
+## SavedVariables: CardinalDB
+## SavedVariablesPerCharacter: CardinalDBPC
 
 ## X-Credits: Siggy
 ## X-Category: Interface Enhancements
@@ -18,11 +21,12 @@ template\UtilityFunctions.lua
 template\EventDispatcher.lua
 
 # Core Files
-Micromap.xml
-Micromap.lua
+Cardinal.xml
+Cardinal.lua
 Utility.lua
 Config.lua
 Debug.lua
+
 
 # Townlong-Yak TaintLess
 TaintLess.xml

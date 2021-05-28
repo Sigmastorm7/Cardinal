@@ -2,75 +2,30 @@ local myname, ns = ...
 local myfullname = GetAddOnMetadata(myname, "Title")
 local Debug = ns.Debug
 
--- Global values for compass headings
-ns.HEADING_INFO = {
-    [0] = {
-        char = "N",
-        direction = "North",
-        font = "DestinyFontLarge",
-    },
-    [45] = {
-        char = "NW",
-        direction = "North West",
-        font = "DestinyFontMed",
-    },
-    [90] = {
-        char = "W",
-        direction = "West",
-        font = "DestinyFontLarge",
-    },
-    [135] = {
-        char = "SW",
-        direction = "South West",
-        font = "DestinyFontMed",
-    },
-    [180] = {
-        char = "S",
-        direction = "South",
-        font = "DestinyFontLarge",
-    },
-    [225] = {
-        char = "SE",
-        direction = "South East",
-        font = "DestinyFontMed",
-    },
-    [270] = {
-        char = "E",
-        direction = "East",
-        font = "DestinyFontLarge",
-    },
-    [315] = {
-        char = "NE",
-        direction = "North East",
-        font = "DestinyFontMed",
-    },
-}
-
-
-function Micromap_Update()
-	MicromapZoneText:SetText(GetMinimapZoneText());
+function Cardinal_Update()
+	CardinalZoneText:SetText(GetMinimapZoneText());
 
 	local pvpType, isSubZonePvP, factionName = GetZonePVPInfo();
 	if ( pvpType == "sanctuary" ) then
-		MicromapZoneText:SetTextColor(0.41, 0.8, 0.94);
+		CardinalZoneText:SetTextColor(0.41, 0.8, 0.94);
 	elseif ( pvpType == "arena" ) then
-		MicromapZoneText:SetTextColor(1.0, 0.1, 0.1);
+		CardinalZoneText:SetTextColor(1.0, 0.1, 0.1);
 	elseif ( pvpType == "friendly" ) then
-		MicromapZoneText:SetTextColor(0.1, 1.0, 0.1);
+		CardinalZoneText:SetTextColor(0.1, 1.0, 0.1);
 	elseif ( pvpType == "hostile" ) then
-		MicromapZoneText:SetTextColor(1.0, 0.1, 0.1);
+		CardinalZoneText:SetTextColor(1.0, 0.1, 0.1);
 	elseif ( pvpType == "contested" ) then
-		MicromapZoneText:SetTextColor(1.0, 0.7, 0.0);
+		CardinalZoneText:SetTextColor(1.0, 0.7, 0.0);
 	else
-		MicromapZoneText:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+		CardinalZoneText:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
 	end
 
-	Micromap_SetTooltip( pvpType, factionName );
+	Cardinal_SetTooltip( pvpType, factionName );
 end
 
-function Micromap_SetTooltip( pvpType, factionName )
-	if ( GameTooltip:IsOwned(MicromapZoneTextButton) ) then
-		GameTooltip:SetOwner(MicromapZoneTextButton, "ANCHOR_BOTTOMLEFT");
+function Cardinal_SetTooltip( pvpType, factionName )
+	if ( GameTooltip:IsOwned(CardinalZoneTextButton) ) then
+		GameTooltip:SetOwner(CardinalZoneTextButton, "ANCHOR_BOTTOMLEFT");
 		local zoneName = GetZoneText();
 		local subzoneName = GetSubZoneText();
 		if ( subzoneName == zoneName ) then
@@ -106,14 +61,14 @@ function Micromap_SetTooltip( pvpType, factionName )
 	end
 end
 
-function MicromapMailFrameUpdate()
+function CardinalMailFrameUpdate()
 	local senders = { GetLatestThreeSenders() };
 	local headerText = #senders >= 1 and HAVE_MAIL_FROM or HAVE_MAIL;
 	FormatUnreadMailTooltip(GameTooltip, headerText, senders);
 	GameTooltip:Show();
 end
 
-function GarrisonLandingPageMicromapButton_OnLoad(self)
+function GarrisonLandingPageCardinalButton_OnLoad(self)
 	self.pulseLocks = {};
 	self:RegisterEvent("GARRISON_SHOW_LANDING_PAGE");
 	self:RegisterEvent("GARRISON_HIDE_LANDING_PAGE");
@@ -132,50 +87,50 @@ function GarrisonLandingPageMicromapButton_OnLoad(self)
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 end
 
-function GarrisonLandingPageMicromapButton_OnEvent(self, event, ...)
+function GarrisonLandingPageCardinalButton_OnEvent(self, event, ...)
 	if (event == "GARRISON_HIDE_LANDING_PAGE") then
 		self:Hide();
 	elseif (event == "GARRISON_SHOW_LANDING_PAGE") then
-		GarrisonLandingPageMicromapButton_UpdateIcon(self);
+		GarrisonLandingPageCardinalButton_UpdateIcon(self);
 		self:Show();
 	elseif ( event == "GARRISON_BUILDING_ACTIVATABLE" ) then
 		local buildingName, garrisonType = ...;
 		if ( garrisonType == C_Garrison.GetLandingPageGarrisonType() ) then
-			GarrisonMicromapBuilding_ShowPulse(self);
+			GarrisonCardinalBuilding_ShowPulse(self);
 		end
 	elseif ( event == "GARRISON_BUILDING_ACTIVATED" or event == "GARRISON_ARCHITECT_OPENED") then
-		GarrisonMicromap_HidePulse(self, GARRISON_ALERT_CONTEXT_BUILDING);
+		GarrisonCardinal_HidePulse(self, GARRISON_ALERT_CONTEXT_BUILDING);
 	elseif ( event == "GARRISON_MISSION_FINISHED" ) then
 		local followerType = ...;
 		if ( DoesFollowerMatchCurrentGarrisonType(followerType) ) then
-			GarrisonMicromapMission_ShowPulse(self, followerType);
+			GarrisonCardinalMission_ShowPulse(self, followerType);
 		end
 	elseif ( event == "GARRISON_MISSION_NPC_OPENED" ) then
 		local followerType = ...;
-		GarrisonMicromap_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[followerType]);
+		GarrisonCardinal_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[followerType]);
 	elseif ( event == "GARRISON_SHIPYARD_NPC_OPENED" ) then
-		GarrisonMicromap_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[Enum.GarrisonFollowerType.FollowerType_6_2]);
+		GarrisonCardinal_HidePulse(self, GARRISON_ALERT_CONTEXT_MISSION[Enum.GarrisonFollowerType.FollowerType_6_2]);
 	elseif (event == "GARRISON_INVASION_AVAILABLE") then
 		if ( C_Garrison.GetLandingPageGarrisonType() == Enum.GarrisonType.Type_6_0 ) then
-			GarrisonMicromapInvasion_ShowPulse(self);
+			GarrisonCardinalInvasion_ShowPulse(self);
 		end
 	elseif (event == "GARRISON_INVASION_UNAVAILABLE") then
-		GarrisonMicromap_HidePulse(self, GARRISON_ALERT_CONTEXT_INVASION);
+		GarrisonCardinal_HidePulse(self, GARRISON_ALERT_CONTEXT_INVASION);
 	elseif (event == "SHIPMENT_UPDATE") then
 		local shipmentStarted, isTroop = ...;
 		if (shipmentStarted) then
-			GarrisonMicromapShipmentCreated_ShowPulse(self, isTroop);
+			GarrisonCardinalShipmentCreated_ShowPulse(self, isTroop);
 		end
 	elseif (event == "PLAYER_ENTERING_WORLD") then
 		self.isInitialLogin = ...;
 		if self.isInitialLogin then
-			EventRegistry:RegisterCallback("CovenantCallings.CallingsUpdated", GarrisonMicromap_OnCallingsUpdated, self);
+			EventRegistry:RegisterCallback("CovenantCallings.CallingsUpdated", GarrisonCardinal_OnCallingsUpdated, self);
 			CovenantCalling_CheckCallings();
 		end
 	end
 end
 
-local function GetMicromapAtlases_GarrisonType8_0(faction)
+local function GetCardinalAtlases_GarrisonType8_0(faction)
 	if faction == "Horde" then
 		return "bfa-landingbutton-horde-up", "bfa-landingbutton-horde-down", "bfa-landingbutton-horde-diamondhighlight", "bfa-landingbutton-horde-diamondglow";
 	else
@@ -184,8 +139,8 @@ local function GetMicromapAtlases_GarrisonType8_0(faction)
 end
 
 local garrisonTypeAnchors = {
-	["default"] = AnchorUtil.CreateAnchor("TOPLEFT", "Micromap", "BOTTOMLEFT", 0, 12),
-	[Enum.GarrisonType.Type_9_0] = AnchorUtil.CreateAnchor("TOPLEFT", "Micromap", "BOTTOMLEFT", 0, 12),
+	["default"] = AnchorUtil.CreateAnchor("RIGHT", "Cardinal", "LEFT", 12, -11),
+	[Enum.GarrisonType.Type_9_0] = AnchorUtil.CreateAnchor("RIGHT", "Cardinal", "LEFT", 12, 1),
 }
 
 local function GetGarrisonTypeAnchor(garrisonType)
@@ -205,7 +160,7 @@ local garrisonType9_0AtlasFormats = {
 	"shadowlands-landingbutton-%s-glow",
 };
 
-local function GetMicromapAtlases_GarrisonType9_0(covenantData)
+local function GetCardinalAtlases_GarrisonType9_0(covenantData)
 	local kit = covenantData and covenantData.textureKit or "kyrian";
 	if kit then
 		local t = garrisonType9_0AtlasFormats;
@@ -222,7 +177,7 @@ local function SetLandingPageIconFromAtlases(self, up, down, highlight, glow)
 	self.LoopingGlow:SetAtlas(glow, true);
 end
 
-function GarrisonLandingPageMicromapButton_UpdateIcon(self)
+function GarrisonLandingPageCardinalButton_UpdateIcon(self)
 	local garrisonType = C_Garrison.GetLandingPageGarrisonType();
 	self.garrisonType = garrisonType;
 
@@ -238,22 +193,22 @@ function GarrisonLandingPageMicromapButton_UpdateIcon(self)
 			self:GetPushedTexture():SetAtlas("GarrLanding-MinimapIcon-Alliance-Down", true);
 		end
 		self.title = GARRISON_LANDING_PAGE_TITLE;
-		self.description = MICROMAP_GARRISON_LANDING_PAGE_TOOLTIP;
+		self.description = Cardinal_GARRISON_LANDING_PAGE_TOOLTIP;
 	elseif (garrisonType == Enum.GarrisonType.Type_7_0) then
 		local _, className = UnitClass("player");
 		self:GetNormalTexture():SetAtlas("legionmission-landingbutton-"..className.."-up", true);
 		self:GetPushedTexture():SetAtlas("legionmission-landingbutton-"..className.."-down", true);
 		self.title = ORDER_HALL_LANDING_PAGE_TITLE;
-		self.description = MICROMAP_ORDER_HALL_LANDING_PAGE_TOOLTIP;
+		self.description = Cardinal_ORDER_HALL_LANDING_PAGE_TOOLTIP;
 	elseif (garrisonType == Enum.GarrisonType.Type_8_0) then
 		self.faction = UnitFactionGroup("player");
-		SetLandingPageIconFromAtlases(self, GetMicromapAtlases_GarrisonType8_0(self.faction));
+		SetLandingPageIconFromAtlases(self, GetCardinalAtlases_GarrisonType8_0(self.faction));
 		self.title = GARRISON_TYPE_8_0_LANDING_PAGE_TITLE;
 		self.description = GARRISON_TYPE_8_0_LANDING_PAGE_TOOLTIP;
 	elseif (garrisonType == Enum.GarrisonType.Type_9_0) then
 		local covenantData = C_Covenants.GetCovenantData(C_Covenants.GetActiveCovenantID());
 		if covenantData then
-			SetLandingPageIconFromAtlases(self, GetMicromapAtlases_GarrisonType9_0(covenantData));
+			SetLandingPageIconFromAtlases(self, GetCardinalAtlases_GarrisonType9_0(covenantData));
 		end
 
 		self.title = GARRISON_TYPE_9_0_LANDING_PAGE_TITLE;
@@ -261,9 +216,9 @@ function GarrisonLandingPageMicromapButton_UpdateIcon(self)
 	end
 end
 
-function GarrisonLandingPageMicromapButton_OnClick(self, button)
+function GarrisonLandingPageCardinalButton_OnClick(self, button)
 	GarrisonLandingPage_Toggle();
-	GarrisonMicromap_HideHelpTip(self);
+	GarrisonCardinal_HideHelpTip(self);
 end
 
 function GarrisonLandingPage_Toggle()
@@ -274,18 +229,18 @@ function GarrisonLandingPage_Toggle()
 	end
 end
 
-function GarrisonMicromap_SetPulseLock(self, lock, enabled)
+function GarrisonCardinal_SetPulseLock(self, lock, enabled)
 	self.pulseLocks[lock] = enabled;
 end
 
--- We play an animation on the garrison Micromap icon for a number of reasons, but only want to turn the
+-- We play an animation on the garrison Cardinal icon for a number of reasons, but only want to turn the
 -- animation off if the user handles all actions related to that alert. For example if we play the animation
 -- because a building can be activated and then another because a garrison invasion has occurred,  we want to
 -- turn off the animation after they handle both the building and invasion, but not if they handle only one.
 -- We always stop the pulse when they click on the landing page icon.
 
-function GarrisonMicromap_HidePulse(self, lock)
-	GarrisonMicromap_SetPulseLock(self, lock, false);
+function GarrisonCardinal_HidePulse(self, lock)
+	GarrisonCardinal_SetPulseLock(self, lock, false);
 	local enabled = false;
 	for k, v in pairs(self.pulseLocks) do
 		if ( v ) then
@@ -296,29 +251,29 @@ function GarrisonMicromap_HidePulse(self, lock)
 
 	-- If there are no other reasons to show the pulse, hide it
 	if (not enabled) then
-		GarrisonLandingPageMicromapButton.MicromapLoopPulseAnim:Stop();
+		GarrisonLandingPageCardinalButton.CardinalLoopPulseAnim:Stop();
 	end
 end
 
-function GarrisonMicromap_ClearPulse()
-	local self = GarrisonLandingPageMicromapButton;
+function GarrisonCardinal_ClearPulse()
+	local self = GarrisonLandingPageCardinalButton;
 	for k, v in pairs(self.pulseLocks) do
 		self.pulseLocks[k] = false;
 	end
-	self.MicromapLoopPulseAnim:Stop();
+	self.CardinalLoopPulseAnim:Stop();
 end
 
-function GarrisonMicromapBuilding_ShowPulse(self)
-	GarrisonMicromap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_BUILDING, true);
-	self.MicromapLoopPulseAnim:Play();
+function GarrisonCardinalBuilding_ShowPulse(self)
+	GarrisonCardinal_SetPulseLock(self, GARRISON_ALERT_CONTEXT_BUILDING, true);
+	self.CardinalLoopPulseAnim:Play();
 end
 
-function GarrisonMicromapMission_ShowPulse(self, followerType)
-	GarrisonMicromap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_MISSION[followerType], true);
-	self.MicromapLoopPulseAnim:Play();
+function GarrisonCardinalMission_ShowPulse(self, followerType)
+	GarrisonCardinal_SetPulseLock(self, GARRISON_ALERT_CONTEXT_MISSION[followerType], true);
+	self.CardinalLoopPulseAnim:Play();
 end
 
-function GarrisonMicromap_Justify(text)
+function GarrisonCardinal_Justify(text)
 	--Center justify if we're on more than one line
 	if ( text:GetNumLines() > 1 ) then
 		text:SetJustifyH("CENTER");
@@ -327,16 +282,16 @@ function GarrisonMicromap_Justify(text)
 	end
 end
 
-function GarrisonMicromapInvasion_ShowPulse(self)
+function GarrisonCardinalInvasion_ShowPulse(self)
 	PlaySound(SOUNDKIT.UI_GARRISON_TOAST_INVASION_ALERT);
 	self.AlertText:SetText(GARRISON_LANDING_INVASION_ALERT);
-	GarrisonMicromap_Justify(self.AlertText);
-	GarrisonMicromap_SetPulseLock(self, GARRISON_ALERT_CONTEXT_INVASION, true);
-	self.MicromapAlertAnim:Play();
-	self.MicromapLoopPulseAnim:Play();
+	GarrisonCardinal_Justify(self.AlertText);
+	GarrisonCardinal_SetPulseLock(self, GARRISON_ALERT_CONTEXT_INVASION, true);
+	self.CardinalAlertAnim:Play();
+	self.CardinalLoopPulseAnim:Play();
 end
 
-function GarrisonMicromapShipmentCreated_ShowPulse(self, isTroop)
+function GarrisonCardinalShipmentCreated_ShowPulse(self, isTroop)
     local text;
     if (isTroop) then
         text = GARRISON_LANDING_RECRUITMENT_STARTED_ALERT;
@@ -345,18 +300,18 @@ function GarrisonMicromapShipmentCreated_ShowPulse(self, isTroop)
     end
 
 	self.AlertText:SetText(text);
-	GarrisonMicromap_Justify(self.AlertText);
-	self.MicromapAlertAnim:Play();
+	GarrisonCardinal_Justify(self.AlertText);
+	self.CardinalAlertAnim:Play();
 end
 
-function GarrisonMicromap_ShowCovenantCallingsNotification(self)
+function GarrisonCardinal_ShowCovenantCallingsNotification(self)
 	self.AlertText:SetText(COVENANT_CALLINGS_AVAILABLE);
-	GarrisonMicromap_Justify(self.AlertText);
-	self.MicromapAlertAnim:Play();
-	self.MicromapLoopPulseAnim:Play();
+	GarrisonCardinal_Justify(self.AlertText);
+	self.CardinalAlertAnim:Play();
+	self.CardinalLoopPulseAnim:Play();
 
 	if not GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS) then
-		GarrisonMicromap_SetQueuedHelpTip(self, {
+		GarrisonCardinal_SetQueuedHelpTip(self, {
 			text = FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS,
 			buttonStyle = HelpTip.ButtonStyle.Close,
 			cvarBitfield = "closedInfoFrames",
@@ -368,21 +323,21 @@ function GarrisonMicromap_ShowCovenantCallingsNotification(self)
 	end
 end
 
-function GarrisonMicromap_OnCallingsUpdated(self, callings, completedCount, availableCount)
+function GarrisonCardinal_OnCallingsUpdated(self, callings, completedCount, availableCount)
 	if self.isInitialLogin then
 		if availableCount > 0 then
-			GarrisonMicromap_ShowCovenantCallingsNotification(self);
+			GarrisonCardinal_ShowCovenantCallingsNotification(self);
 		end
 
 		self.isInitialLogin = false;
 	end
 end
 
-function GarrisonMicromap_SetQueuedHelpTip(self, tipInfo)
+function GarrisonCardinal_SetQueuedHelpTip(self, tipInfo)
 	self.queuedHelpTip = tipInfo;
 end
 
-function GarrisonMicromap_CheckQueuedHelpTip(self)
+function GarrisonCardinal_CheckQueuedHelpTip(self)
 	if self.queuedHelpTip then
 		local tip = self.queuedHelpTip;
 		self.queuedHelpTip = nil;
@@ -390,15 +345,15 @@ function GarrisonMicromap_CheckQueuedHelpTip(self)
 	end
 end
 
-function GarrisonMicromap_ClearQueuedHelpTip(self)
+function GarrisonCardinal_ClearQueuedHelpTip(self)
 	if self.queuedHelpTip and self.queuedHelpTip.text == FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS then
 		self.queuedHelpTip = nil;
 	end
 end
 
-function GarrisonMicromap_HideHelpTip(self)
+function GarrisonCardinal_HideHelpTip(self)
 	if self.garrisonType == Enum.GarrisonType.Type_9_0 then
 		HelpTip:Acknowledge(self, FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS);
-		GarrisonMicromap_ClearQueuedHelpTip(self, FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS);
+		GarrisonCardinal_ClearQueuedHelpTip(self, FRAME_TUTORIAL_9_0_GRRISON_LANDING_PAGE_BUTTON_CALLINGS);
 	end
 end
