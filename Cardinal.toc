@@ -11,8 +11,6 @@
 ## X-Credits: Siggy
 ## X-Category: Interface Enhancements
 
-## X-Embeds: HereBeDragons-2.0
-
 embeds.xml
 
 #template\Locale.lua

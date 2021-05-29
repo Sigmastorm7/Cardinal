@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, undefined-field
 local myname, ns = ...
 local myfullname = GetAddOnMetadata(myname, "Title")
 local Debug = ns.Debug
@@ -17,6 +18,8 @@ ns:RegisterEvent("ADDON_LOADED")
 
 Minimap:UnregisterEvent("MINIMAP_UPDATE_ZOOM")
 MinimapCluster = CardinalCluster
+local zoneTextButton = MinimapZoneTextButton
+zoneTextButton:Hide()
 Minimap:Hide()
 
 function ns:ADDON_LOADED(event, addon)
@@ -184,7 +187,7 @@ function ns:TrackingUpdate()
 		local objectives = C_QuestLog.GetQuestObjectives(tracked)
 
 		-- When logging in C_.GetQuestObjectives() seems to return 'nil' despite C_.IsSuperTrackingAnything() returning true
-		if not objectives then return end
+		if not objectives or not objectives[1] or not objectives[1]["text"] then return end
 
 		CardinalTracker.Title:SetText(C_QuestLog.GetTitleForQuestID(tracked))
 		CardinalTracker.Objective:SetText(objectives[1]["text"])
@@ -332,7 +335,7 @@ function ns:UpdateWorldPOIs(mapid)
 
 				poiButton.questType = "WQ"
 
-				local distance = C_QuestLog.GetDistanceSqToQuest(poiButton.questID)
+				-- local distance = C_QuestLog.GetDistanceSqToQuest(poiButton.questID)
 
 				poiButton:SetScale(ns.db.iconScale * poiButton.scaleFactor)-- (rad(rad(sqrt(distance))))*0.75)
 

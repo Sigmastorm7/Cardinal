@@ -599,7 +599,7 @@
             </Layer>
         </Layers>
         <Scripts>
-            <OnUpdate function="Cardinal_Update"/>
+            <!--<OnUpdate function="Cardinal_Update"/>-->
             <OnShow>
                 <!--self.Arrow:SetRotation(rad(180))-->
             </OnShow>

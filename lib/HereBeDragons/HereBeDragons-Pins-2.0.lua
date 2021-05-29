@@ -404,12 +404,12 @@ HBD.RegisterCallback(pins, "PlayerZoneChanged", UpdateMinimap)
 
 --- Add a icon to the minimap (x/y world coordinate version)
 -- Note: This API does not let you specify a map to limit the pin to, it'll be shown on all maps these coordinates are valid for.
--- $param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
--- $param icon Icon Frame
--- $param instanceID Instance ID of the map to add the icon to
--- $param x X position in world coordinates
--- $param y Y position in world coordinates
--- $param floatOnEdge flag if the icon should float on the edge of the minimap when going out of range, or hide immediately (default false)
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
+-- @param instanceID Instance ID of the map to add the icon to
+-- @param x X position in world coordinates
+-- @param y Y position in world coordinates
+-- @param floatOnEdge flag if the icon should float on the edge of the minimap when going out of range, or hide immediately (default false)
 function pins:AddMinimapIconWorld(ref, icon, instanceID, x, y, floatOnEdge)
     if not ref then
         error(MAJOR..": AddMinimapIconWorld: 'ref' must not be nil", 2)
@@ -443,13 +443,13 @@ end
 
 --- Add a icon to the minimap (UiMapID zone coordinate version)
 -- The pin will only be shown on the map specified, or optionally its parent map if specified
--- $param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
--- $param icon Icon Frame
--- $param uiMapID uiMapID of the map to place the icon on
--- $param x X position in local/point coordinates (0-1), relative to the zone
--- $param y Y position in local/point coordinates (0-1), relative to the zone
--- $param showInParentZone flag if the icon should be shown in its parent zone - ie. an icon in a microdungeon in the outdoor zone itself (default false)
--- $param floatOnEdge flag if the icon should float on the edge of the minimap when going out of range, or hide immediately (default false)
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
+-- @param uiMapID uiMapID of the map to place the icon on
+-- @param x X position in local/point coordinates (0-1), relative to the zone
+-- @param y Y position in local/point coordinates (0-1), relative to the zone
+-- @param showInParentZone flag if the icon should be shown in its parent zone - ie. an icon in a microdungeon in the outdoor zone itself (default false)
+-- @param floatOnEdge flag if the icon should float on the edge of the minimap when going out of range, or hide immediately (default false)
 function pins:AddMinimapIconMap(ref, icon, uiMapID, x, y, showInParentZone, floatOnEdge)
     if not ref then
         error(MAJOR..": AddMinimapIconMap: 'ref' must not be nil", 2)
@@ -473,8 +473,8 @@ function pins:AddMinimapIconMap(ref, icon, uiMapID, x, y, showInParentZone, floa
 end
 
 --- Remove a minimap icon
--- $param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
--- $param icon Icon Frame
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
 function pins:RemoveMinimapIcon(ref, icon)
     if not ref or not icon or not minimapPinRegistry[ref] then return end
     minimapPinRegistry[ref][icon] = nil
@@ -487,7 +487,7 @@ function pins:RemoveMinimapIcon(ref, icon)
 end
 
 --- Remove all minimap icons belonging to your addon (as tracked by "ref")
--- $param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 function pins:RemoveAllMinimapIcons(ref)
     if not ref or not minimapPinRegistry[ref] then return end
     for icon in pairs(minimapPinRegistry[ref]) do
@@ -500,7 +500,7 @@ function pins:RemoveAllMinimapIcons(ref)
 end
 
 --- Set the minimap object to position the pins on. Needs to support the usual functions a Minimap-type object exposes.
--- $param minimapObject The new minimap object, or nil to restore the default
+-- @param minimapObject The new minimap object, or nil to restore the default
 function pins:SetMinimapObject(minimapObject)
     pins.Minimap = minimapObject or Cardinal
     for pin in pairs(minimapPins) do
@@ -518,8 +518,8 @@ HBD_PINS_WORLDMAP_SHOW_CONTINENT = 2
 HBD_PINS_WORLDMAP_SHOW_WORLD     = 3
 
 --- Return the angle and distance from the player to the specified pin
--- $param icon icon object (minimap or worldmap)
--- $return angle, distance where angle is in radians and distance in yards
+-- @param icon icon object (minimap or worldmap)
+-- @return angle, distance where angle is in radians and distance in yards
 function pins:GetVectorToIcon(icon)
     if not icon then return nil, nil end
     local data = minimapPins[icon] or worldmapPins[icon]

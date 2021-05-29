@@ -1,6 +1,14 @@
 local myname, ns = ...
 local myfullname = GetAddOnMetadata(myname, "Title")
 local Debug = ns.Debug
+----------------------------------------------------------------
+-- HereBeDragonsPins integration
+----------------------------------------------------------------
+local HBDPins = LibStub("HereBeDragons-Pins-2.0")
+
+----------------------------------------------------------------
+-- Minimap cluster required functions
+----------------------------------------------------------------
 
 function Cardinal_Update()
 	CardinalZoneText:SetText(GetMinimapZoneText());
