@@ -93,7 +93,7 @@ local tooltip = CreateFrame("GameTooltip", "POITooltip", UIParent, "GameTooltipT
 ---------------------------------------------------------------------------
 local function CompassUpdate(self, elapsed)
 	local facing = GetPlayerFacing()
-	if not facing then print("No facing value, returning...") return end
+	if not facing then return end
 
 	timeElapsed = timeElapsed + elapsed
     while (timeElapsed > crdn.db.throttle) do
@@ -151,6 +151,8 @@ function crdn:DrawPOIs()
 
 	local facing = GetPlayerFacing()
     local x, y, instance = HBD:GetPlayerWorldPosition()
+
+	if not facing then return end
 
 	if x ~= lastXX or y ~= lastYY or facing ~= lastFacing then
 
