@@ -147,8 +147,8 @@ local function GetCardinalAtlases_GarrisonType8_0(faction)
 end
 
 local garrisonTypeAnchors = {
-	["default"] = AnchorUtil.CreateAnchor("RIGHT", "Cardinal", "LEFT", 12, -11),
-	[Enum.GarrisonType.Type_9_0] = AnchorUtil.CreateAnchor("RIGHT", "Cardinal", "LEFT", 12, 1),
+	["default"] = AnchorUtil.CreateAnchor("TOPLEFT", "Cardinal", "BOTTOMLEFT"),
+	[Enum.GarrisonType.Type_9_0] = AnchorUtil.CreateAnchor("TOPLEFT", "Cardinal", "BOTTOMLEFT"),
 }
 
 local function GetGarrisonTypeAnchor(garrisonType)

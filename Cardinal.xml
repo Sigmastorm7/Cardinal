@@ -1,12 +1,13 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="Utility.lua"/>
-    <!--<Button name="CardinalPinButtonTemplate" parent="CardinalSliderCluster" inherits="WorldQuestPinMixin" virtual="true">
-    </Button>-->
-    <Slider name="CardinalPinSliderTemplate" parent="CardinalSliderCluster" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL" virtual="true">
+    <Slider name="CardinalSliderTemplate" parent="CardinalSliderCluster" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL" virtual="true">
         <Size>
-            <AbsDimension x="720" y="45"/>
+            <AbsDimension x="800" y="20"/>
         </Size>
+        <KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_SLIDER_8_8" type="global"/>
+		</KeyValues>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
@@ -158,7 +159,7 @@
                             </OnShow>
                         </Scripts>
                     </Slider>
-                    <Slider parentKey="NorthWest" defaultvalue="-45" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                    <!--<Slider parentKey="NorthWest" defaultvalue="-45" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
                         <Size>
                             <AbsDimension x="720" y="45"/>
                         </Size>
@@ -273,7 +274,7 @@
                                 self:SetValueStep(1);
                             </OnShow>
                         </Scripts>
-                    </Slider>
+                    </Slider>-->
                 </Frames>
             </Frame>
             <Button name="GarrisonLandingPageCardinalButton" parentKey="Garrison" hidden="true">
@@ -522,42 +523,21 @@
             </Frame>
         </Frames>
         <Layers>
-            <!--<Layer level="OVERLAY" textureSubLevel="0">
-                <Texture parentKey="CenterOuterRing" file="Interface/Garrison/AdventureMissionsFrame">
-                    <Size x="64" y="66"/>
-                    <TexCoords left="0.103515625" right="0.1953125" top="0.76513671875" bottom="0.81201171875"/>
-                    <Anchors>
-                        <Anchor point="CENTER" relativeKey="$parent" relativePoint="CENTER"/>
-                    </Anchors>
-                </Texture>
-            </Layer>
-            <Layer level="OVERLAY" textureSubLevel="-1">
-                <Texture parentKey="Arrow" file="Interface/Garrison/AdventureMissionsFrame">
-                    <Size x="20" y="15"/>
-                    <TexCoords left="0.197265625" right="0.216796875" top="0.80322265625" bottom="0.810546875"/>
-                    <Anchors>
-                        <Anchor point="BOTTOM" relativeKey="$parent.CenterOuterRing" relativePoint="BOTTOM" x="0" y="4"/>
-                    </Anchors>
-                </Texture>
-            </Layer>-->
             <Layer level="BACKGROUND" textureSubLevel="3">
-                <Texture parentKey="StyleLeft" file="Interface/Garrison/AdventureMissionsFrame">
-                    <Size x="302.3" y="41"/>
-                    <TexCoords left="0.2841796875" right="0.5845" top="0.50965" bottom="0.5300"/> <!--top="0.5078125" bottom="0.53271484375"-->
+                <Texture parentKey="StyleLeft" horizTile="false" useAtlasSize="false"  atlas="PetJournal-BattleSlotTitle-Left">
+                    <Size x="56" y="56"/>
                     <Anchors>
-                        <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT" x="-36" y="0"/>
+                        <Anchor point="RIGHT" relativeKey="$parent" relativePoint="LEFT" x="0" y="0"/>
                     </Anchors>
                 </Texture>
-                <Texture parentKey="StyleRight" file="Interface/Garrison/AdventureMissionsFrame">
-                    <Size x="302.3" y="41"/>
-                    <TexCoords left="0.35163" right="0.6513671875" top="0.50965" bottom="0.5300"/>
+                <Texture parentKey="StyleRight" horizTile="false" useAtlasSize="false"  atlas="PetJournal-BattleSlotTitle-Right">
+                    <Size x="56" y="56"/>
                     <Anchors>
-                        <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" x="36" y="0"/>
+                        <Anchor point="LEFT" relativeKey="$parent" relativePoint="RIGHT" x="0" y="0"/>
                     </Anchors>
                 </Texture>
-                <Texture parentKey="StyleMiddle" file="Interface/Garrison/AdventureMissionsFrame">
-                    <Size x="302.3" y="41"/>
-                    <TexCoords left="0.35163" right="0.5845" top="0.50965" bottom="0.5300"/>
+                <Texture parentKey="StyleMiddle" horizTile="true" useAtlasSize="false" atlas="_BattleSlotTitle-Mid">
+                    <Size x="800" y="56"/>
                     <Anchors>
                         <Anchor point="CENTER" relativeKey="$parent" relativePoint="CENTER" x="0" y="0"/>
                     </Anchors>
@@ -569,22 +549,6 @@
                     <TexCoords left="0.615234375" right="0.984375" top="0.509765625" bottom="0.58203125"/>
                     <Anchors>
                         <Anchor point="TOP" relativeKey="$parent" relativePoint="BOTTOM" x="0" y="8"/>
-                    </Anchors>
-                </Texture>
-            </Layer>
-            <Layer level="BACKGROUND" textureSubLevel="0">
-                <Texture parentKey="GarrisonBGLeft" file="Interface/FrameGeneral/UIFrameOribos">
-                    <Size x="142.6" y="60"/>
-                    <TexCoords left="0.00390625" right="0.79296875" top="0.8046875" bottom="0.8876953125"/>
-                    <Anchors>
-                        <Anchor point="RIGHT" relativeKey="$parent" relativePoint="LEFT" x="60" y="0"/>
-                    </Anchors>
-                </Texture>
-                <Texture parentKey="GarrisonBGRight" file="Interface/FrameGeneral/UIFrameOribos">
-                    <Size x="142.6" y="60"/>
-                    <TexCoords left="0.00390625" right="0.79296875" top="0.8896484375" bottom="0.97265625"/>
-                    <Anchors>
-                        <Anchor point="LEFT" relativeKey="$parent.GarrisonBGLeft" relativePoint="RIGHT" x="-90" y="0"/>
                     </Anchors>
                 </Texture>
             </Layer>

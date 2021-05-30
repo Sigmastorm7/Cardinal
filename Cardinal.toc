@@ -1,16 +1,13 @@
 ## Interface: 90005
-
 ## Title: Cardinal
 ## Author: Siggy
-## Notes: A minimap so small it's basically no minimap at all!
-## Version: 1.0.0
-
+## Version: 0.2.0
 ## SavedVariables: CardinalDB
 ## SavedVariablesPerCharacter: CardinalDBPC
-
 ## X-Credits: Siggy
 ## X-Category: Interface Enhancements
 
+#Embeded libraries
 embeds.xml
 
 #template\Locale.lua
@@ -24,6 +21,8 @@ Cardinal.lua
 Utility.lua
 Config.lua
 
+#Extracted Blizzard Functions
+WQDataProvider.lua
 
 # Townlong-Yak TaintLess
 TaintLess.xml
