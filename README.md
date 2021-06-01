@@ -1,5 +1,5 @@
 # Cardinal
-Cardinal is a World of Warcraft addon designed to replace the minimap and associated 'cluster' features with a cardinal direction display.
+Cardinal is a World of Warcraft addon designed to replace the minimap and associated 'cluster' features with a cardinal direction & objective HUD à la Skyrim, Fallout, DOOM Eternal, etc.
 
 ### Known Issues:
 
