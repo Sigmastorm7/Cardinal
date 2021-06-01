@@ -1,10 +1,13 @@
 --@diagnostic disable: undefined-global, undefined-field
-local myname, alpha = ...
+local myname, crdn = ...
 
-alpha.GetMap = WorldQuestDataProviderMixin.GetMap
-alpha.AcquirePin = WorldQuestDataProviderMixin.AcquirePin
-alpha.GetPinTemplate = WorldQuestDataProviderMixin.GetPinTemplate
-alpha.ShouldShowExpirationIcon = WorldQuestDataProviderMixin.ShouldShowExpirationIcon
+crdn.GetMap = WorldQuestDataProviderMixin.GetMap
+crdn.AcquirePin = WorldQuestDataProviderMixin.AcquirePin
+crdn.GetPinTemplate = WorldQuestDataProviderMixin.GetPinTemplate
+crdn.ShouldShowExpirationIcon = WorldQuestDataProviderMixin.ShouldShowExpirationIcon
+
+crdn.usedQuestNumbers = crdn.usedQuestNumbers or {};
+crdn.pinsMissingNumbers = crdn.pinsMissingNumbers or {};
 
 local fauxDataProvider = {
     GetBountyQuestID = function() return nil end,
@@ -12,8 +15,69 @@ local fauxDataProvider = {
     ShouldHighlightInfo = function() return false end,
 }
 
-function alpha:AddWorldQuest(info, i)
-	local pin = CreateFrame("BUTTON", "WQ"..i..".Button", alpha.frame, "WorldQuestPinTemplate")
+function crdn:AssignMissingNumbersToPins()
+	if #self.pinsMissingNumbers > 0 then
+		for questNumber = 1, C_QuestLog.GetMaxNumQuests() do
+			if not self.usedQuestNumbers[questNumber] then
+				local pin = table.remove(self.pinsMissingNumbers);
+				pin:AssignQuestNumber(questNumber);
+
+				if #self.pinsMissingNumbers == 0 then
+					break;
+				end
+			end
+		end
+
+		wipe(self.pinsMissingNumbers);
+	end
+	wipe(self.usedQuestNumbers);
+end
+
+function crdn:AddQuest(info, i)
+
+	if not crdn:UpdatePreCheck() then return end
+
+	local isWaypoint;
+	local mapID = crdn:GetMap();
+	local pin = crdn.lqButtonPool:Acquire();
+
+	pin.questID = info.questID;
+	QuestPOI_SetPinScale(pin, 2.5);
+
+	local isSuperTracked = info.questId == C_SuperTrack.GetSuperTrackedQuestID();
+	local isComplete = false; -- QuestCache:Get(questID):IsComplete();
+
+	pin.isSuperTracked = isSuperTracked;
+
+	pin.Display:ClearAllPoints();
+	pin.Display:SetPoint("CENTER");
+	pin.moveHighlightOnMouseDown = false;
+	pin.selected = isSuperTracked;
+	pin.style = QuestPOI_GetStyleFromQuestData(pin, isComplete, isWaypoint);
+
+	if pin.style == "numeric" then
+		-- try to match the number with tracker or quest log POI if possible
+		local poiButton = QuestPOI_FindButton(ObjectiveTrackerFrame.BlocksFrame, info.questID) or QuestPOI_FindButton(QuestScrollFrame.Contents, info.questID);
+		if poiButton and poiButton.style == "numeric" then
+			local questNumber = poiButton.index;
+			self.usedQuestNumbers[questNumber] = true;
+			pin:SetQuestNumber(questNumber);
+		else
+			table.insert(self.pinsMissingNumbers, pin);
+		end
+	end
+
+	QuestPOI_UpdateButtonStyle(pin);
+
+	-- pin:SetPosition(x, y);
+	return pin;
+end
+
+function crdn:AddWorldQuest(info)
+
+	if not crdn:UpdatePreCheck() then return end
+
+	local pin = crdn.wqButtonPool:Acquire()
 	pin.questID = info.questId;
 	pin.dataProvider = fauxDataProvider; -- self;
 
@@ -79,89 +143,3 @@ function alpha:AddWorldQuest(info, i)
 
 	return pin;
 end
-
---[[
-do
-	local fauxDataProvider = {
-		GetBountyQuestID = function() return nil end,
-		IsMarkingActiveQuests = function() return true end,
-		ShouldHighlightInfo = function() return false end,
-	}
-	function alpha:GetWorldQuestButton(info, i)
-		local poiButton = CreateFrame("BUTTON", "WQ"..i, alpha.frame, "WorldMap_WorldQuestPinTemplate")
-
-		poiButton.questID = info.questId
-		poiButton.dataProvider = fauxDataProvider
-		poiButton.scaleFactor = 0.4
-
-		local tagInfo = C_QuestLog.GetQuestTagInfo(info.questId)
-		-- local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(info.questId)
-		local tradeskillLineID = tagInfo.tradeskillLineID and select(7, GetProfessionInfo(tagInfo.tradeskillLineID))
-
-		poiButton.worldQuestType = tagInfo.worldQuestType
-
-		if tagInfo.quality ~= Enum.WorldQuestQuality.Common then
-			poiButton.Background:SetTexCoord(0, 1, 0, 1);
-			poiButton.PushedBackground:SetTexCoord(0, 1, 0, 1);
-			poiButton.Highlight:SetTexCoord(0, 1, 0, 1);
-
-			poiButton.Background:SetSize(45, 45);
-			poiButton.PushedBackground:SetSize(45, 45);
-			poiButton.Highlight:SetSize(45, 45);
-			poiButton.SelectedGlow:SetSize(45, 45);
-
-			if tagInfo.quality == Enum.WorldQuestQuality.Rare then
-				poiButton.Background:SetAtlas("worldquest-questmarker-rare");
-				poiButton.PushedBackground:SetAtlas("worldquest-questmarker-rare-down");
-				poiButton.Highlight:SetAtlas("worldquest-questmarker-rare");
-				poiButton.SelectedGlow:SetAtlas("worldquest-questmarker-rare");
-			elseif tagInfo.quality == Enum.WorldQuestQuality.Epic then
-				poiButton.Background:SetAtlas("worldquest-questmarker-epic");
-				poiButton.PushedBackground:SetAtlas("worldquest-questmarker-epic-down");
-				poiButton.Highlight:SetAtlas("worldquest-questmarker-epic");
-				poiButton.SelectedGlow:SetAtlas("worldquest-questmarker-epic");
-			end
-		else
-			poiButton.Background:SetSize(75, 75);
-			poiButton.PushedBackground:SetSize(75, 75);
-			poiButton.Highlight:SetSize(75, 75);
-
-			-- We are setting the texture without updating the tex coords.  Refresh visuals will handle
-			-- updating the tex coords based on whether this pin is selected or not.
-			poiButton.Background:SetTexture("Interface/WorldMap/UI-QuestPoi-NumberIcons");
-			poiButton.PushedBackground:SetTexture("Interface/WorldMap/UI-QuestPoi-NumberIcons");
-			poiButton.Highlight:SetTexture("Interface/WorldMap/UI-QuestPoi-NumberIcons");
-
-			poiButton.Highlight:SetTexCoord(0.625, 0.750, 0.875, 1);
-		end
-
-		poiButton:RefreshVisuals()
-		-- alpha:RefreshWorldQuestButton(poiButton)
-
-		if tagInfo.isElite then
-			poiButton.Underlay:SetAtlas("worldquest-questmarker-dragon");
-			poiButton.Underlay:Show();
-		else
-			poiButton.Underlay:Hide();
-		end
-
-		local timeLeftMinutes = C_TaskQuest.GetQuestTimeLeftMinutes(info.questId)
-		if timeLeftMinutes and timeLeftMinutes <= WORLD_QUESTS_TIME_LOW_MINUTES then
-			poiButton.TimeLowFrame:Show()
-		else
-			poiButton.TimeLowFrame:Hide()
-		end
-
-		poiButton:SetScale(0.3)
-
-		-- poiButton:SetSize(20, 20)
-		-- poiButton.Glow:SetSize(29, 29)
-		-- poiButton.BountyRing:SetSize(29, 29)
-		-- poiButton.Underlay:SetSize(32, 32)
-		-- poiButton.TrackedCheck:SetSize(17, 15)
-		-- poiButton.TimeLowFrame:SetSize(18, 18)
-
-		return poiButton
-	end
-end
-]]

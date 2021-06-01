@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="Utility.lua"/>
-    <Slider name="CardinalSliderTemplate" parent="CardinalSliderCluster" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL" virtual="true">
+    <Slider name="CardinalSliderTemplate" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL" virtual="true">
         <Size>
             <AbsDimension x="800" y="20"/>
         </Size>
@@ -35,7 +35,14 @@
             <Anchor point="TOP" x="0" y="-12"/>
         </Anchors>
         <Frames>
-            <Frame name="CardinalSliderCluster" enableMouse="false">
+            <Frame parentKey="Buttons">
+                <Scripts>
+                    <OnLoad>
+                        self:SetAllPoints();
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            <Frame parentKey="Sliders" enableMouse="false">
                 <Size>
                     <AbsDimension x="720" y="45"/>
                 </Size>
@@ -43,7 +50,7 @@
                     <Anchor point="CENTER"/>
                 </Anchors>
                 <Frames>
-                    <Slider parentKey="North" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                    <Slider name="$parentNorth" defaultvalue="0" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
                         <Size>
                             <AbsDimension x="720" y="45"/>
                         </Size>
@@ -72,7 +79,7 @@
                             </OnShow>
                         </Scripts>
                     </Slider>
-                    <Slider parentKey="East" defaultvalue="90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                    <Slider name="$parentEast" defaultvalue="90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
                         <Size>
                             <AbsDimension x="720" y="45"/>
                         </Size>
@@ -101,7 +108,7 @@
                             </OnShow>
                         </Scripts>
                     </Slider>
-                    <Slider parentKey="South" defaultvalue="180" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                    <Slider name="$parentSouth" defaultvalue="180" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
                         <Size>
                             <AbsDimension x="720" y="45"/>
                         </Size>
@@ -130,7 +137,7 @@
                             </OnShow>
                         </Scripts>
                     </Slider>
-                    <Slider parentKey="West" defaultvalue="-90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
+                    <Slider name="$parentWest" defaultvalue="-90" minvalue="-180" maxvalue="180" orientation="HORIZONTAL">
                         <Size>
                             <AbsDimension x="720" y="45"/>
                         </Size>

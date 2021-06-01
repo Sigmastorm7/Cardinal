@@ -14,83 +14,88 @@ crdn.defaults = {
 	compassFOV = 90,
 }
 crdn.defaultsPC = {}
-
 ---------------------------------------------------------------------------
 -- Initialization
 ---------------------------------------------------------------------------
+_G.switch = function(param, caseTable)
+
+	local case = caseTable[param]
+	if case then return case() end
+
+	local def = caseTable["default"]
+	return def and def() or nil
+
+end
+
 crdn:RegisterEvent("ADDON_LOADED")
 function crdn:ADDON_LOADED(event, addon)
 	if addon ~= myname then return end
 	self:InitDB()
 
-	-- Quest events
+	-- Events for updating quest data
 	self:RegisterEvent("QUEST_POI_UPDATE")
 	self:RegisterEvent("QUEST_LOG_UPDATE")
-	self:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
-	self:RegisterEvent("SUPER_TRACKING_CHANGED")
-
-	-- Map/Zone events
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-
-	-- Player events
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PLAYER_STARTED_TURNING")
-	self:RegisterEvent("PLAYER_STOPPED_TURNING")
-	self:RegisterEvent("PLAYER_STARTED_MOVING")
-	self:RegisterEvent("PLAYER_STOPPED_MOVING")
-	self:RegisterEvent("PLAYER_ENTER_COMBAT")
+	self:RegisterEvent("SUPER_TRACKING_CHANGED")
+	self:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
 
-	local update = function() self:DrawPOIs() end
+	--[[local update = function() self:UpdatePOIs() end
 	hooksecurefunc(C_QuestLog, "AddQuestWatch", update)
-	hooksecurefunc(C_QuestLog, "RemoveQuestWatch", update)
+	hooksecurefunc(C_QuestLog, "RemoveQuestWatch", update)]]
 
-	QuestPOI_Initialize(Cardinal)
-	-- crdn.wqpool = CreateFramePool("BUTTON", crdn.poi_parent, "WorldMap_WorldQuestPinTemplate")
+	crdn.Cardinal = Cardinal
+	QuestPOI_Initialize(crdn.Cardinal)
+	crdn.wqButtonPool = CreateFramePool("Button", crdn.Cardinal.Buttons, "WorldQuestPinTemplate")
+	crdn.lqButtonPool = CreateFramePool("Button", crdn.Cardinal.Buttons, "QuestPinTemplate")
+	crdn.sliderPool = CreateFramePool("Slider", crdn.Cardinal.Sliders, "CardinalSliderTemplate")
 
 	self:UnregisterEvent("ADDON_LOADED")
 	self.ADDON_LOADED = nil
+
+	crdn:UpdatePOIs()
 
 	if IsLoggedIn() then self:PLAYER_LOGIN() else self:RegisterEvent("PLAYER_LOGIN") end
 end
 
 function crdn:PLAYER_LOGIN()
-	crdn:RegisterEvent("PLAYER_LOGOUT")
+	self:RegisterEvent("PLAYER_LOGOUT")
 	-- Do anything you need to do after the player has entered the world
 
-	crdn:UnregisterEvent("PLAYER_LOGIN")
-	crdn.PLAYER_LOGIN = nil
+	self:UpdatePOIs()
+
+	self:UnregisterEvent("PLAYER_LOGIN")
+	self.PLAYER_LOGIN = nil
 end
 
 function crdn:PLAYER_LOGOUT()
-	crdn:FlushDB()
+	self:FlushDB()
 	-- Do anything you need to do as the player logs out
 end
 ---------------------------------------------------------------------------
 -- Local values
 ---------------------------------------------------------------------------
-crdn.cardinalPOIs = crdn.cardinalPOIs or {}
-local cardinalPOIs = crdn.cardinalPOIs
-
-local taskPOIs = {}
+local cardinalPOIs = {}
 local timeElapsed = 0
 local _value
 local lastFacing, lastXX, lastYY
 
-local tableCache = setmetatable({}, {__mode='k'})
-
-local mapID = C_Map.GetBestMapForUnit("PLAYER")
-if mapID then
-	taskPOIs = C_TaskQuest.GetQuestsForPlayerByMapID(mapID)
-else
-	return
-end
----------------------------------------------------------------------------
--- Frame creation & pool setup
----------------------------------------------------------------------------
+crdn.Cardinal = Cardinal
 local tooltip = CreateFrame("GameTooltip", "POITooltip", UIParent, "GameTooltipTemplate")
 ---------------------------------------------------------------------------
 -- Functions
 ---------------------------------------------------------------------------
+function crdn:UpdatePreCheck()
+	local x, y, mapid = HBD:GetPlayerZonePosition()
+	if not (mapid and x and y) then
+		-- Means that this was probably a change triggered by the world map being
+		-- opened and browsed around. Since this is the case, we won't update any POIs for now.
+		return false
+	else
+		return true
+	end
+end
+
 local function CompassUpdate(self, elapsed)
 	local facing = GetPlayerFacing()
 	if not facing then return end
@@ -98,7 +103,7 @@ local function CompassUpdate(self, elapsed)
 	timeElapsed = timeElapsed + elapsed
     while (timeElapsed > crdn.db.throttle) do
         timeElapsed = timeElapsed - crdn.db.throttle
-        local value = deg(GetPlayerFacing()) + self.offset
+        local value = deg(facing) + self.offset
         if value == _value then
             return
         elseif value ~= _value then
@@ -120,15 +125,36 @@ local function CompassUpdate(self, elapsed)
     end
 end
 
--- Script hooks for cardinal direction sliders
-CardinalSliderCluster.North:HookScript("OnUpdate", CompassUpdate)
-CardinalSliderCluster.East:HookScript("OnUpdate", CompassUpdate)
-CardinalSliderCluster.South:HookScript("OnUpdate", CompassUpdate)
-CardinalSliderCluster.West:HookScript("OnUpdate", CompassUpdate)
--- CardinalSliderCluster.NorthWest:HookScript("OnUpdate", CompassUpdate)
--- CardinalSliderCluster.SouthWest:HookScript("OnUpdate", CompassUpdate)
--- CardinalSliderCluster.SouthEast:HookScript("OnUpdate", CompassUpdate)
--- CardinalSliderCluster.NorthEast:HookScript("OnUpdate", CompassUpdate)
+do -- Script hooks for cardinal direction sliders
+	CardinalNorth:HookScript("OnUpdate", CompassUpdate)
+	CardinalEast:HookScript("OnUpdate", CompassUpdate)
+	CardinalSouth:HookScript("OnUpdate", CompassUpdate)
+	CardinalWest:HookScript("OnUpdate", CompassUpdate)
+	-- CardinalSliderCluster.NorthWest:HookScript("OnUpdate", CompassUpdate)
+	-- CardinalSliderCluster.SouthWest:HookScript("OnUpdate", CompassUpdate)
+	-- CardinalSliderCluster.SouthEast:HookScript("OnUpdate", CompassUpdate)
+	-- CardinalSliderCluster.NorthEast:HookScript("OnUpdate", CompassUpdate)
+end
+
+function crdn:UpdatePOIs(...)
+
+	if not crdn:UpdatePreCheck() then return end
+
+	for _, poiButton in pairs(cardinalPOIs) do
+		self:ResetPOIs(poiButton)
+	end
+
+	self:UpdateLogQuestPOIs()
+	self:UpdateWorldQuestPOIs()
+	self:DrawPOIs()
+
+end
+crdn.QUEST_POI_UPDATE = crdn.UpdatePOIs
+crdn.QUEST_LOG_UPDATE = crdn.UpdatePOIs
+crdn.QUEST_WATCH_LIST_CHANGED = crdn.UpdatePOIs
+crdn.SUPER_TRACKING_CHANGED = crdn.UpdatePOIs
+crdn.ZONE_CHANGED_NEW_AREA = crdn.UpdatePOIs
+crdn.PLAYER_ENTERING_WORLD = crdn.UpdatePOIs
 
 local function ThrottledOnUpdate(self, elapsed)
 
@@ -142,12 +168,100 @@ local function ThrottledOnUpdate(self, elapsed)
 	end
 end
 
-Cardinal.updateFrame = CreateFrame("FRAME", nil, Cardinal)
-Cardinal.updateFrame:HookScript("OnUpdate", ThrottledOnUpdate)
+crdn.Cardinal.updateFrame = CreateFrame("Frame")
+crdn.Cardinal.updateFrame:SetScript("OnUpdate", ThrottledOnUpdate)
+
+function crdn:UpdateLogQuestPOIs()
+
+	local onMap
+	local mapID = C_Map.GetBestMapForUnit("player")
+
+	if mapID then onMap = C_QuestLog.GetQuestsOnMap(mapID) else return end
+	if onMap == nil or #onMap == 0 then return end
+
+	for i, info in pairs(onMap) do
+
+		local poiButton = crdn:AddQuest(info, i)
+
+		poiButton.ID = "LQ"..i
+
+		poiButton.slider = crdn.sliderPool:Acquire()
+		poiButton.slider:SetPoint("CENTER", crdn.Cardinal, "CENTER")
+
+		local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(info.x, info.y, mapID)
+
+		poiButton:SetScale(0.5)
+
+		poiButton.questID = info.questID
+
+		poiButton.x = xCoord
+		poiButton.y = yCoord
+
+		poiButton:SetScript("OnEnter", crdn.POI_OnEnter)
+		poiButton:SetScript("OnLeave", crdn.POI_OnLeave)
+   		poiButton:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
+   		poiButton:SetScript("PostClick", crdn.POI_PostClick)
+
+		poiButton:Show()
+		poiButton.slider:Show()
+
+		cardinalPOIs[poiButton.ID] = poiButton
+
+	end
+
+	return cardinalPOIs
+
+end
+
+function crdn:UpdateWorldQuestPOIs()
+
+	local taskInfo
+	local mapID = C_Map.GetBestMapForUnit("player")
+
+	if mapID then taskInfo = C_TaskQuest.GetQuestsForPlayerByMapID(mapID) else return end
+	if taskInfo == nil or #taskInfo == 0 then return end
+
+	for i, info in ipairs(taskInfo) do
+
+		if not C_QuestLog.IsQuestCalling(info.questId) then
+
+			local poiButton = crdn:AddWorldQuest(info, i)
+
+			poiButton.ID = "WQ"..i
+
+			poiButton.slider = crdn.sliderPool:Acquire()
+			poiButton.slider:SetPoint("CENTER", crdn.Cardinal, "CENTER")
+
+			local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(info.x, info.y, mapID)
+
+			poiButton:SetScale(0.5)
+
+			poiButton.questID = info.questId
+
+			poiButton.x = xCoord
+			poiButton.y = yCoord
+
+			poiButton:SetScript("OnEnter", crdn.POI_OnEnter)
+			poiButton:SetScript("OnLeave", crdn.POI_OnLeave)
+   			poiButton:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
+   			poiButton:SetScript("PostClick", crdn.POI_PostClick)
+
+			poiButton:Show()
+			poiButton.slider:Show()
+
+			cardinalPOIs[poiButton.ID] = poiButton
+
+		end
+
+	end
+
+	return cardinalPOIs
+
+end
 
 function crdn:DrawPOIs()
 
-	if not cardinalPOIs[1] then crdn:GetPOIButtons() end
+	if not crdn:UpdatePreCheck() then return end
 
 	local facing = GetPlayerFacing()
     local x, y, instance = HBD:GetPlayerWorldPosition()
@@ -156,7 +270,7 @@ function crdn:DrawPOIs()
 
 	if x ~= lastXX or y ~= lastYY or facing ~= lastFacing then
 
-		for _, poiButton in ipairs(cardinalPOIs) do
+		for _, poiButton in pairs(cardinalPOIs) do
 
 			if not poiButton then break end
 
@@ -185,55 +299,41 @@ function crdn:DrawPOIs()
 
 	else
 
-	lastXX, lastYY, lastFacing = x, y, facing
-
 		return
 
 	end
 
 end
 
-function crdn:GetPOIButtons()
+function crdn:ResetPOIs(poiButton)
 
-    if taskPOIs == nil or #taskPOIs == 0 then return end
+		if poiButton then
 
-    for i, info  in ipairs(taskPOIs) do
+			crdn.sliderPool:Release(poiButton.slider)
 
-		local questID = info.questId
+			if string.match(poiButton.ID, "LQ") then
+				crdn.lqButtonPool:Release(poiButton)
+			elseif string.match(poiButton.ID, "WQ") then
+				crdn.wqButtonPool:Release(poiButton)
+			end
 
-		local poiButton = crdn:AddWorldQuest(info, i)
-		poiButton:SetScript("OnEnter", POI_OnEnter)
-        poiButton:SetScript("OnLeave", POI_OnLeave)
-        poiButton:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
-        poiButton:SetScript("PostClick", POI_PostClick)
+			-- poiButton:Hide()
+			poiButton = nil
 
-        poiButton.slider = CreateFrame("SLIDER", "WQ"..i..".Slider", Cardinal, "CardinalSliderTemplate")
-
-		local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(info.x, info.y, C_TaskQuest.GetQuestZoneID(questID))
-
-		poiButton:SetScale(0.25)
-
-		poiButton.x = xCoord
-		poiButton.y = yCoord
-
-    	cardinalPOIs[i] = poiButton
-
-    end
-
-    return cardinalPOIs
+		end
 
 end
 
-function POI_OnEnter(self)
+function crdn:POI_OnEnter(self)
 	if not self.questID then return	end
 	if UIParent:IsVisible() then tooltip:SetParent(UIParent) else tooltip:SetParent(self) end
 	tooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
 	tooltip:SetHyperlink("quest:" .. self.questID)
 end
-function POI_OnLeave(self)
+function crdn:POI_OnLeave(self)
 	tooltip:Hide()
 end
-function POI_PostClick(poiButton, mouseButton, down)
+function crdn:POI_PostClick(poiButton, mouseButton, down)
     if mouseButton == "LeftButton" then
 		if poiButton.selected then
 			poiButton.selected = false
@@ -286,7 +386,7 @@ end
 		{ Name = "soulbindIDs", Type = "table", InnerType = "number", Nilable = false },
 	},
 
-    Function = C_TaskQuest.GetQuestsForPlayerByMapID(uiMapID = {number}) returns: "taskPOIs"
+    Function = C_TaskQuest.GetQuestsForPlayerByMapID(uiMapID = {number}) returns: "pois"
     Name = "TaskPOIData",
 	Type = "Structure",
 	Fields =
